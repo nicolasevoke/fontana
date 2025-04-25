@@ -24,25 +24,24 @@ def get_session_id():
         raise ValueError("No se pudo obtener session_id.")
     return session_id
 
-@app.route("/sale_order_limited")
-def get_sale_orders_limited():
+@app.route("/product_template")
+def get_product_template():
     try:
         session_id = get_session_id()
         headers = {"Content-Type": "application/json", "Cookie": f"session_id={session_id}"}
 
         offset = 0
         limit = 100
-        max_records = 1000
         all_records = []
 
-        while len(all_records) < max_records:
+        while True:
             payload = {
                 "jsonrpc": "2.0",
                 "method": "call",
                 "params": {
-                    "model": "sale.order",
+                    "model": "product.template",
                     "method": "search_read",
-                    "args": [[]],  # 🚫 Sin filtros
+                    "args": [[]],
                     "kwargs": {
                         "offset": offset,
                         "limit": limit
@@ -50,7 +49,7 @@ def get_sale_orders_limited():
                 }
             }
 
-            res = requests.post(f"{ODOO_URL}/web/dataset/call_kw/sale.order/search_read", json=payload, headers=headers)
+            res = requests.post(f"{ODOO_URL}/web/dataset/call_kw/product.template/search_read", json=payload, headers=headers)
             json_res = res.json()
 
             if "error" in json_res:
@@ -62,10 +61,6 @@ def get_sale_orders_limited():
 
             all_records.extend(data)
             offset += limit
-
-            if len(all_records) > max_records:
-                all_records = all_records[:max_records]
-                break
 
         return jsonify(all_records)
 
