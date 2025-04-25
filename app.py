@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, request, jsonify
 import requests
 
 app = Flask(__name__)
@@ -24,45 +24,36 @@ def get_session_id():
         raise ValueError("No se pudo obtener session_id.")
     return session_id
 
-@app.route("/product_template")
-def get_product_template():
+@app.route("/product_template_paginated")
+def get_product_template_paginated():
     try:
+        offset = int(request.args.get("offset", 0))
+        limit = int(request.args.get("limit", 100))
+
         session_id = get_session_id()
         headers = {"Content-Type": "application/json", "Cookie": f"session_id={session_id}"}
 
-        offset = 0
-        limit = 100
-        all_records = []
-
-        while True:
-            payload = {
-                "jsonrpc": "2.0",
-                "method": "call",
-                "params": {
-                    "model": "product.template",
-                    "method": "search_read",
-                    "args": [[]],
-                    "kwargs": {
-                        "offset": offset,
-                        "limit": limit
-                    }
+        payload = {
+            "jsonrpc": "2.0",
+            "method": "call",
+            "params": {
+                "model": "product.template",
+                "method": "search_read",
+                "args": [[]],
+                "kwargs": {
+                    "offset": offset,
+                    "limit": limit
                 }
             }
+        }
 
-            res = requests.post(f"{ODOO_URL}/web/dataset/call_kw/product.template/search_read", json=payload, headers=headers)
-            json_res = res.json()
+        res = requests.post(f"{ODOO_URL}/web/dataset/call_kw/product.template/search_read", json=payload, headers=headers)
+        json_res = res.json()
 
-            if "error" in json_res:
-                return jsonify({"error": json_res["error"]}), 500
+        if "error" in json_res:
+            return jsonify({"error": json_res["error"]}), 500
 
-            data = json_res.get("result", [])
-            if not data:
-                break
-
-            all_records.extend(data)
-            offset += limit
-
-        return jsonify(all_records)
+        return jsonify(json_res.get("result", []))
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
