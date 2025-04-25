@@ -27,7 +27,7 @@ def get_session_id():
 
 @app.route("/sale_order_incremental")
 def get_sale_orders_incremental():
-    from_date = request.args.get("from", "2025-04-24")  # default desde el 23 de abril 2025
+    from_date = request.args.get("from", "2025-04-23")
     try:
         datetime.strptime(from_date, "%Y-%m-%d")
     except ValueError:
@@ -40,8 +40,9 @@ def get_sale_orders_incremental():
         offset = 0
         limit = 100
         all_records = []
+        max_records = 1000  # ✅ límite de registros a traer
 
-        while True:
+        while len(all_records) < max_records:
             payload = {
                 "jsonrpc": "2.0",
                 "method": "call",
@@ -51,14 +52,7 @@ def get_sale_orders_incremental():
                     "args": [[["date_order", ">", from_date]]],
                     "kwargs": {
                         "offset": offset,
-                        "limit": limit,
-                        "fields": [
-                            "name", "state", "date_order", "validity_date", "create_date",
-                            "partner_id", "currency_id", "user_id", "invoice_status",
-                            "amount_untaxed", "amount_tax", "amount_total", "team_id", "id",
-                            "warehouse_id", "cancel_reason_id", "x_for_main",
-                            "x_studio_tipo_de_cliente_1", "payment_term_id", "currency_rate"
-                        ]
+                        "limit": limit
                     }
                 }
             }
@@ -75,6 +69,10 @@ def get_sale_orders_incremental():
 
             all_records.extend(data)
             offset += limit
+
+            if len(all_records) > max_records:
+                all_records = all_records[:max_records]
+                break
 
         return jsonify(all_records)
 
