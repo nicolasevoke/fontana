@@ -42,7 +42,12 @@ def get_product_template_paginated():
                 "args": [[]],
                 "kwargs": {
                     "offset": offset,
-                    "limit": limit
+                    "limit": limit,
+                    "fields": [
+                        "name", "type", "categ_id", "list_price",
+                        "uom_id", "seller_ids", "default_code", "id",
+                        "classification_category", "cost_history"
+                    ]
                 }
             }
         }
