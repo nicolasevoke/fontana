@@ -1,5 +1,6 @@
-from flask import Flask, jsonify
+from flask import Flask, request, jsonify
 import requests
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -24,8 +25,14 @@ def get_session_id():
         raise ValueError("No se pudo obtener session_id.")
     return session_id
 
-@app.route("/sale_order_filtered")
-def get_sale_orders_filtered():
+@app.route("/sale_order_incremental")
+def get_sale_orders_incremental():
+    from_date = request.args.get("from", "2025-04-24")  # default desde el 23 de abril 2025
+    try:
+        datetime.strptime(from_date, "%Y-%m-%d")
+    except ValueError:
+        return jsonify({"error": "Formato de fecha inválido. Usa YYYY-MM-DD"}), 400
+
     try:
         session_id = get_session_id()
         headers = {"Content-Type": "application/json", "Cookie": f"session_id={session_id}"}
@@ -41,7 +48,7 @@ def get_sale_orders_filtered():
                 "params": {
                     "model": "sale.order",
                     "method": "search_read",
-                    "args": [[]],  # Sin filtros de fecha
+                    "args": [[["date_order", ">", from_date]]],
                     "kwargs": {
                         "offset": offset,
                         "limit": limit,
