@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, request, jsonify
 import requests
 
 app = Flask(__name__)
@@ -27,6 +27,10 @@ def get_session_id():
 @app.route("/product_template")
 def get_product_template():
     try:
+        # Leer offset y limit desde la URL
+        offset = int(request.args.get("offset", 0))
+        limit = int(request.args.get("limit", 100))
+
         session_id = get_session_id()
         headers = {"Content-Type": "application/json", "Cookie": f"session_id={session_id}"}
 
@@ -38,8 +42,8 @@ def get_product_template():
                 "method": "search_read",
                 "args": [[]],
                 "kwargs": {
-                    "offset": 0,
-                    "limit": 100,
+                    "offset": offset,
+                    "limit": limit,
                     "fields": [
                         "name", "type", "categ_id", "list_price",
                         "uom_id", "seller_ids", "default_code", "id",
