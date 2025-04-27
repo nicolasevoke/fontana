@@ -24,8 +24,8 @@ def get_session_id():
         raise ValueError("No se pudo obtener session_id.")
     return session_id
 
-@app.route("/product_template_fixed")
-def get_product_template_fixed():
+@app.route("/product_template")
+def get_product_template():
     try:
         session_id = get_session_id()
         headers = {"Content-Type": "application/json", "Cookie": f"session_id={session_id}"}
@@ -39,7 +39,7 @@ def get_product_template_fixed():
                 "args": [[]],
                 "kwargs": {
                     "offset": 0,
-                    "limit": 100,  # 🔥 Límite fijo programado en el backend
+                    "limit": 100,
                     "fields": [
                         "name", "type", "categ_id", "list_price",
                         "uom_id", "seller_ids", "default_code", "id",
