@@ -47,7 +47,7 @@ def get_product_template():
                     "fields": [
                         "name", "type", "categ_id", "list_price",
                         "uom_id", "seller_ids", "default_code", "id",
-                        "classification_category", "cost_history","volume","weight","weight_kg","empaque","x_studio_m3"
+                        "classification_category", "cost_history","volume","weight","weight_kg","empaque","x_studio_m3","standard_price"
                     ]
                 }
             }
